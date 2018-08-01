@@ -4,7 +4,7 @@
 package-install-mongodb:
   pkg.installed:
     - pkgs:
-      - mongodb-org
+      - {{ config.package.mongo_pkg_name }}
     - refresh: True
     - require:
       - pkgrepo: mongodb_repo
