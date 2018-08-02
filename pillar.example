@@ -83,3 +83,81 @@ mongodb:
           mask: '/32'
           fqdn: 'mongo02.alias454.local'
           port: '27017'
+
+
+#Percona config stable
+mongodb:
+  lookup:
+    managed_dbs:
+      - database: 'admin'            # admin db settings -- used if auth enabled
+        name: 'admin'                # The name of the user to manage
+        passwd: 'password'           # The password of the user to manage
+        user: 'admin'                # MongoDB user with sufficient privilege to create the user
+        password: 'password'         # Password for the admin user specified by the user parameter
+        authdb: 'admin'              # The database in which to authenticate
+      - database: 'test'             # Example DB to create
+        name: 'script'
+        passwd: 'script'
+        user: 'admin'
+        password: 'password'
+        authdb: 'admin'
+    firewall:
+      firewalld:
+        status: 'Active'
+    package:
+      repo_version: '3.6'
+      repo_baseurl: 'deb http://repo.percona.com/apt {{ grains.oscodename }} main'
+      repo_keyserver: 'keyserver.ubuntu.com'
+      repo_key: '8507EFA5'
+      mongo_pkg_name: 'percona-server-mongodb-36'
+      mongo_user: 'mongod'
+      mongo_group: 'mongod'
+    mongodb:
+      storage_dbpath: '/var/lib/mongodb'               # Define default location for mongo DB path on Debian systems
+      storage_engine: 'wiredTiger'                        # default mmapv1 rocksdb wiredTiger inMemory
+
+      storage_in_memory:
+        engineConfig:
+          inMemorySizeGB: 1
+          statisticsLogDelaySecs: 0
+
+      storage_mmapv1:
+        preallocDataFiles: true
+        nsSize: 16
+        quota:
+          enforced: false
+          maxFilesPerDB: 8
+        smallFiles: false
+
+      storage_wired_tiger:
+        engineConfig:
+          cacheSizeGB: 1
+          checkpointSizeMB: '1000'
+          statisticsLogDelaySecs: 0
+          journalCompressor: 'snappy'
+          directoryForIndexes: 'false'
+        collectionConfig:
+          blockCompressor: 'snappy'
+        indexConfig:
+          prefixCompression: 'true'
+
+      engine_rocks_db:
+        cacheSizeGB: 1
+        compression: 'snappy'
+        maxWriteMBPerSec: 1024
+        crashSafeCounters: 'false'
+        counters: 'true'
+        singleDeleteIndex: 'false'
+
+      params: '' #todo
+#      params:
+#        wiredTigerConcurrentReadTransactions: 128
+#        wiredTigerConcurrentWriteTransactions: 128
+
+      restart_service_after_state_change: 'false'
+      use_security_auth: 'true'                         # Use authentication
+      security_auth: 'enabled'                          # Set auth enabled or disabled
+      use_external_net: 'false'                         # Use a secondary ip interface
+      external_net_bindip: '0.0.0.0'                    # Ex. '{{ grains.ipv4[1] }}, 127.0.0.1' or '0.0.0.0' to listen on all interfaces
+      local_net_bindip: '127.0.0.1'                     # If external_net_bindip is set only used for local db creation
+      use_replica_set: 'false'                          # Enable replica set states
